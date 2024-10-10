@@ -233,6 +233,35 @@ If both TCP and UDP are wanted for the same port, two entryPoints definitions ar
 
     Full details for how to specify `address` can be found in [net.Listen](https://golang.org/pkg/net/#Listen) (and [net.Dial](https://golang.org/pkg/net/#Dial)) of the doc for go.
 
+### AllowACMEByPass
+
+_Optional, Default=false_
+
+`allowACMEByPass` determines whether a user defined router can handle ACME TLS or HTTP challenges instead of the Traefik dedicated one.
+This option can be used when a Traefik instance has one or more certificate resolvers configured,
+but is also used to route challenges connections/requests to services that could also initiate their own ACME challenges.
+
+??? info "No Certificate Resolvers configured"
+
+    It is not necessary to use the `allowACMEByPass' option certificate option if no certificate resolver is defined.
+    In fact, Traefik will automatically allow ACME TLS or HTTP requests to be handled by custom routers in this case, since there can be no concurrency with its own challenge handlers.
+
+```yaml tab="File (YAML)"
+entryPoints:
+  foo:
+    allowACMEByPass: true
+```
+
+```toml tab="File (TOML)"
+[entryPoints.foo]
+  [entryPoints.foo.allowACMEByPass]
+    allowACMEByPass = true
+```
+
+```bash tab="CLI"
+--entryPoints.name.allowACMEByPass=true
+```
+
 ### ReusePort
 
 _Optional, Default=false_
@@ -500,6 +529,40 @@ You can configure Traefik to trust the forwarded headers information (`X-Forward
     --entryPoints.web.forwardedHeaders.insecure
     ```
 
+??? info "`forwardedHeaders.connection`"
+    
+    As per RFC7230, Traefik respects the Connection options from the client request.
+    By doing so, it removes any header field(s) listed in the request Connection header and the Connection header field itself when empty.
+    The removal happens as soon as the request is handled by Traefik,
+    thus the removed headers are not available when the request passes through the middleware chain.
+    The `connection` option lists the Connection headers allowed to passthrough the middleware chain before their removal.
+
+    ```yaml tab="File (YAML)"
+    ## Static configuration
+    entryPoints:
+      web:
+        address: ":80"
+        forwardedHeaders:
+          connection:
+            - foobar
+    ```
+
+    ```toml tab="File (TOML)"
+    ## Static configuration
+    [entryPoints]
+      [entryPoints.web]
+        address = ":80"
+
+        [entryPoints.web.forwardedHeaders]
+          connection = ["foobar"]
+    ```
+
+    ```bash tab="CLI"
+    ## Static configuration
+    --entryPoints.web.address=:80
+    --entryPoints.web.forwardedHeaders.connection=foobar
+    ```
+
 ### Transport
 
 #### `respondingTimeouts`
@@ -748,7 +811,7 @@ entryPoints:
   [entryPoints.name]
     address = ":8888"
     [entryPoints.name.transport]
-      keepAliveMaxTime = 42s
+      keepAliveMaxTime = "42s"
 ```
 
 ```bash tab="CLI"
@@ -1175,3 +1238,25 @@ entryPoints:
 ```
 
 {!traefik-for-business-applications.md!}
+
+## Systemd Socket Activation
+
+Traefik supports [systemd socket activation](https://www.freedesktop.org/software/systemd/man/latest/systemd-socket-activate.html).
+
+When a socket activation file descriptor name matches an EntryPoint name, the corresponding file descriptor will be used as the TCP listener for the matching EntryPoint.
+
+```bash
+systemd-socket-activate -l 80 -l 443 --fdname web:websecure  ./traefik --entrypoints.web --entrypoints.websecure
+```
+
+!!! warning "EntryPoint Address"
+
+    When a socket activation file descriptor name matches an EntryPoint name its address configuration is ignored.     
+
+!!! warning "TCP Only"
+
+    Socket activation is not yet supported with UDP entryPoints.
+
+!!! warning "Docker Support"
+
+    Socket activation is not supported by Docker but works with Podman containers.

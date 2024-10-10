@@ -26,6 +26,7 @@ type RouterIng struct {
 	EntryPoints []string                 `json:"entryPoints,omitempty"`
 	Middlewares []string                 `json:"middlewares,omitempty"`
 	Priority    int                      `json:"priority,omitempty"`
+	RuleSyntax  string                   `json:"ruleSyntax,omitempty"`
 	TLS         *dynamic.RouterTLSConfig `json:"tls,omitempty" label:"allowEmpty"`
 }
 
@@ -45,7 +46,7 @@ type ServiceIng struct {
 	ServersTransport string          `json:"serversTransport,omitempty"`
 	PassHostHeader   *bool           `json:"passHostHeader"`
 	Sticky           *dynamic.Sticky `json:"sticky,omitempty" label:"allowEmpty"`
-	NativeLB         bool            `json:"nativeLB,omitempty"`
+	NativeLB         *bool           `json:"nativeLB,omitempty"`
 	NodePortLB       bool            `json:"nodePortLB,omitempty"`
 }
 

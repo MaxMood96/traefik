@@ -163,6 +163,7 @@ nav:
           - 'Overview': 'observability/tracing/overview.md'
           - 'OpenTelemetry': 'observability/tracing/opentelemetry.md'
   - 'User Guides':
+      - 'FastProxy': 'user-guides/fastproxy.md'
       - 'Kubernetes and Let''s Encrypt': 'user-guides/crd-acme/index.md'
       - 'gRPC Examples': 'user-guides/grpc.md'
       - 'Docker':
@@ -172,7 +173,10 @@ nav:
           - 'HTTP Challenge': 'user-guides/docker-compose/acme-http/index.md'
           - 'DNS Challenge': 'user-guides/docker-compose/acme-dns/index.md'
   - 'Migration':
-      - 'Traefik v2 to v3': 'migration/v2-to-v3.md'
+      - 'Traefik v3 minor migrations': 'migration/v3.md'
+      - 'Traefik v2 to v3':
+        - 'Migration guide': 'migration/v2-to-v3.md'
+        - 'Configuration changes for v3': 'migration/v2-to-v3-details.md'
       - 'Traefik v2 minor migrations': 'migration/v2.md'
       - 'Traefik v1 to v2': 'migration/v1-to-v2.md'
   - 'Contributing':
@@ -196,7 +200,6 @@ nav:
         - 'Docker': 'reference/dynamic-configuration/docker.md'
         - 'Swarm': 'reference/dynamic-configuration/swarm.md'
         - 'Kubernetes CRD': 'reference/dynamic-configuration/kubernetes-crd.md'
-        - 'Kubernetes Gateway API': 'reference/dynamic-configuration/kubernetes-gateway.md'
         - 'Consul Catalog': 'reference/dynamic-configuration/consul-catalog.md'
         - 'Nomad': "reference/dynamic-configuration/nomad.md"
         - 'ECS': 'reference/dynamic-configuration/ecs.md'

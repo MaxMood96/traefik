@@ -201,6 +201,7 @@ type Tracing struct {
 	GlobalAttributes        map[string]string `description:"Defines additional attributes (key:value) on all spans." json:"globalAttributes,omitempty" toml:"globalAttributes,omitempty" yaml:"globalAttributes,omitempty" export:"true"`
 	CapturedRequestHeaders  []string          `description:"Request headers to add as attributes for server and client spans." json:"capturedRequestHeaders,omitempty" toml:"capturedRequestHeaders,omitempty" yaml:"capturedRequestHeaders,omitempty" export:"true"`
 	CapturedResponseHeaders []string          `description:"Response headers to add as attributes for server and client spans." json:"capturedResponseHeaders,omitempty" toml:"capturedResponseHeaders,omitempty" yaml:"capturedResponseHeaders,omitempty" export:"true"`
+	SafeQueryParams         []string          `description:"Query params to not redact." json:"safeQueryParams,omitempty" toml:"safeQueryParams,omitempty" yaml:"safeQueryParams,omitempty" export:"true"`
 	SampleRate              float64           `description:"Sets the rate between 0.0 and 1.0 of requests to trace." json:"sampleRate,omitempty" toml:"sampleRate,omitempty" yaml:"sampleRate,omitempty" export:"true"`
 	AddInternals            bool              `description:"Enables tracing for internal services (ping, dashboard, etc...)." json:"addInternals,omitempty" toml:"addInternals,omitempty" yaml:"addInternals,omitempty" export:"true"`
 
@@ -211,6 +212,9 @@ type Tracing struct {
 func (t *Tracing) SetDefaults() {
 	t.ServiceName = "traefik"
 	t.SampleRate = 1.0
+
+	t.OTLP = &opentelemetry.Config{}
+	t.OTLP.SetDefaults()
 }
 
 // Providers contains providers configuration.
@@ -279,14 +283,8 @@ func (c *Configuration) SetEffectiveConfiguration() {
 		}
 	}
 
-	// Disable Gateway API provider if not enabled in experimental.
-	if c.Experimental == nil || !c.Experimental.KubernetesGateway {
-		c.Providers.KubernetesGateway = nil
-	}
-
 	// Configure Gateway API provider
 	if c.Providers.KubernetesGateway != nil {
-		log.Debug().Msg("Experimental Kubernetes Gateway provider has been activated")
 		entryPoints := make(map[string]gateway.Entrypoint)
 		for epName, entryPoint := range c.EntryPoints {
 			entryPoints[epName] = gateway.Entrypoint{Address: entryPoint.GetAddress(), HasHTTPTLSConf: entryPoint.HTTP.TLS != nil}
@@ -319,7 +317,6 @@ func (c *Configuration) initACMEProvider() {
 
 // ValidateConfiguration validate that configuration is coherent.
 func (c *Configuration) ValidateConfiguration() error {
-	var acmeEmail string
 	for name, resolver := range c.CertificatesResolvers {
 		if resolver.ACME != nil && resolver.Tailscale != nil {
 			return fmt.Errorf("unable to initialize certificates resolver %q, as ACME and Tailscale providers are mutually exclusive", name)
@@ -332,11 +329,6 @@ func (c *Configuration) ValidateConfiguration() error {
 		if len(resolver.ACME.Storage) == 0 {
 			return fmt.Errorf("unable to initialize certificates resolver %q with no storage location for the certificates", name)
 		}
-
-		if acmeEmail != "" && resolver.ACME.Email != acmeEmail {
-			return fmt.Errorf("unable to initialize certificates resolver %q, as all ACME resolvers must use the same email", name)
-		}
-		acmeEmail = resolver.ACME.Email
 	}
 
 	if c.Core != nil {

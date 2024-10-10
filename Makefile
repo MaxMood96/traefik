@@ -1,13 +1,10 @@
 SRCS = $(shell git ls-files '*.go' | grep -v '^vendor/')
 
-TAG_NAME := $(shell git tag -l --contains HEAD)
+TAG_NAME := $(shell git describe --abbrev=0 --tags --exact-match)
 SHA := $(shell git rev-parse HEAD)
 VERSION_GIT := $(if $(TAG_NAME),$(TAG_NAME),$(SHA))
 VERSION := $(if $(VERSION),$(VERSION),$(VERSION_GIT))
 
-GIT_BRANCH := $(subst heads/,,$(shell git rev-parse --abbrev-ref HEAD 2>/dev/null))
-
-REPONAME := $(shell echo $(REPO) | tr '[:upper:]' '[:lower:]')
 BIN_NAME := traefik
 CODENAME ?= cheddar
 
@@ -88,7 +85,7 @@ crossbinary-default: generate generate-webui
 
 .PHONY: test
 #? test: Run the unit and integration tests
-test: test-unit test-integration
+test: test-ui-unit test-unit test-integration
 
 .PHONY: test-unit
 #? test-unit: Run the unit tests
@@ -103,7 +100,15 @@ test-integration: binary
 .PHONY: test-gateway-api-conformance
 #? test-gateway-api-conformance: Run the conformance tests
 test-gateway-api-conformance: build-image-dirty
-	GOOS=$(GOOS) GOARCH=$(GOARCH) go test ./integration -v -test.run K8sConformanceSuite -k8sConformance $(TESTFLAGS)
+	# In case of a new Minor/Major version, the k8sConformanceTraefikVersion needs to be updated.
+	GOOS=$(GOOS) GOARCH=$(GOARCH) go test ./integration -v -test.run K8sConformanceSuite -k8sConformance -k8sConformanceTraefikVersion="v3.2" $(TESTFLAGS)
+
+.PHONY: test-ui-unit
+#? test-ui-unit: Run the unit tests for the webui
+test-ui-unit:
+	$(MAKE) build-webui-image
+	docker run --rm -v "$(PWD)/webui/static":'/src/webui/static' traefik-webui yarn --cwd webui install
+	docker run --rm -v "$(PWD)/webui/static":'/src/webui/static' traefik-webui yarn --cwd webui test:unit:ci
 
 .PHONY: pull-images
 #? pull-images: Pull all Docker images to avoid timeout during integration tests

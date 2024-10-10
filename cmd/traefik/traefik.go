@@ -15,7 +15,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/coreos/go-systemd/daemon"
+	"github.com/coreos/go-systemd/v22/daemon"
 	"github.com/go-acme/lego/v4/challenge"
 	gokitmetrics "github.com/go-kit/kit/metrics"
 	"github.com/rs/zerolog/log"
@@ -37,6 +37,8 @@ import (
 	"github.com/traefik/traefik/v3/pkg/provider/aggregator"
 	"github.com/traefik/traefik/v3/pkg/provider/tailscale"
 	"github.com/traefik/traefik/v3/pkg/provider/traefik"
+	"github.com/traefik/traefik/v3/pkg/proxy"
+	"github.com/traefik/traefik/v3/pkg/proxy/httputil"
 	"github.com/traefik/traefik/v3/pkg/safe"
 	"github.com/traefik/traefik/v3/pkg/server"
 	"github.com/traefik/traefik/v3/pkg/server/middleware"
@@ -46,6 +48,7 @@ import (
 	"github.com/traefik/traefik/v3/pkg/tracing"
 	"github.com/traefik/traefik/v3/pkg/types"
 	"github.com/traefik/traefik/v3/pkg/version"
+	"golang.org/x/exp/maps"
 )
 
 func main() {
@@ -224,10 +227,21 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 	}
 
 	// Plugins
+	pluginLogger := log.Ctx(ctx).With().Logger()
+	hasPlugins := staticConfiguration.Experimental != nil && (staticConfiguration.Experimental.Plugins != nil || staticConfiguration.Experimental.LocalPlugins != nil)
+	if hasPlugins {
+		pluginsList := maps.Keys(staticConfiguration.Experimental.Plugins)
+		pluginsList = append(pluginsList, maps.Keys(staticConfiguration.Experimental.LocalPlugins)...)
+
+		pluginLogger = pluginLogger.With().Strs("plugins", pluginsList).Logger()
+		pluginLogger.Info().Msg("Loading plugins...")
+	}
 
 	pluginBuilder, err := createPluginBuilder(staticConfiguration)
 	if err != nil {
-		log.Error().Err(err).Msg("Plugins are disabled because an error has occurred.")
+		pluginLogger.Err(err).Msg("Plugins are disabled because an error has occurred.")
+	} else if hasPlugins {
+		pluginLogger.Info().Msg("Plugins loaded.")
 	}
 
 	// Providers plugins
@@ -269,10 +283,16 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 		log.Info().Msg("Successfully obtained SPIFFE SVID.")
 	}
 
-	roundTripperManager := service.NewRoundTripperManager(spiffeX509Source)
+	transportManager := service.NewTransportManager(spiffeX509Source)
+
+	var proxyBuilder service.ProxyBuilder = httputil.NewProxyBuilder(transportManager, semConvMetricRegistry)
+	if staticConfiguration.Experimental != nil && staticConfiguration.Experimental.FastProxy != nil {
+		proxyBuilder = proxy.NewSmartBuilder(transportManager, proxyBuilder, *staticConfiguration.Experimental.FastProxy)
+	}
+
 	dialerManager := tcp.NewDialerManager(spiffeX509Source)
 	acmeHTTPHandler := getHTTPChallengeHandler(acmeProviders, httpChallengeProvider)
-	managerFactory := service.NewManagerFactory(*staticConfiguration, routinesPool, observabilityMgr, roundTripperManager, acmeHTTPHandler)
+	managerFactory := service.NewManagerFactory(*staticConfiguration, routinesPool, observabilityMgr, transportManager, proxyBuilder, acmeHTTPHandler)
 
 	// Router factory
 
@@ -306,7 +326,8 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 
 	// Server Transports
 	watcher.AddListener(func(conf dynamic.Configuration) {
-		roundTripperManager.Update(conf.HTTP.ServersTransports)
+		transportManager.Update(conf.HTTP.ServersTransports)
+		proxyBuilder.Update(conf.HTTP.ServersTransports)
 		dialerManager.Update(conf.TCP.ServersTransports)
 	})
 
@@ -352,7 +373,7 @@ func setupServer(staticConfiguration *static.Configuration) (*server.Server, err
 
 			if _, ok := resolverNames[rt.TLS.CertResolver]; !ok {
 				log.Error().Err(err).Str(logs.RouterName, rtName).Str("certificateResolver", rt.TLS.CertResolver).
-					Msg("Router uses a non-existent certificate resolver")
+					Msg("Router uses a nonexistent certificate resolver")
 			}
 		}
 	})

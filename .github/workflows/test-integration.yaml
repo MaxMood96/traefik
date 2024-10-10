@@ -4,9 +4,13 @@ on:
   pull_request:
     branches:
       - '*'
+    paths-ignore:
+      - 'docs/**'
+      - '**.md'
+      - 'script/gcg/**'
 
 env:
-  GO_VERSION: '1.22'
+  GO_VERSION: '1.23'
   CGO_ENABLED: 0
 
 jobs:
@@ -39,7 +43,7 @@ jobs:
       fail-fast: true
       matrix:
         parallel: [12]
-        index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 , 11]
+        index: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
     steps:
       - name: Check out code
@@ -60,7 +64,7 @@ jobs:
 
       - name: Generate go test Slice
         id: test_split
-        uses: hashicorp-forge/go-test-split-action@v1
+        uses: hashicorp-forge/go-test-split-action@v2.0.0
         with:
           packages: ./integration
           total: ${{ matrix.parallel }}

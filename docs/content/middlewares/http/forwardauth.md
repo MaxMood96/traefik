@@ -300,7 +300,7 @@ labels:
 ```
 
 ```yaml tab="Kubernetes"
-apiVersion: traefik.containo.us/v1alpha1
+apiVersion: traefik.io/v1alpha1
 kind: Middleware
 metadata:
   name: test-auth
@@ -316,13 +316,6 @@ spec:
 - "traefik.http.middlewares.test-auth.forwardauth.addAuthCookiesToResponse=Session-Cookie,State-Cookie"
 ```
 
-```toml tab="File (TOML)"
-[http.middlewares]
-  [http.middlewares.test-auth.forwardAuth]
-    address = "https://example.com/auth"
-    addAuthCookiesToResponse = ["Session-Cookie", "State-Cookie"]
-```
-
 ```yaml tab="File (YAML)"
 http:
   middlewares:
@@ -332,6 +325,13 @@ http:
         addAuthCookiesToResponse:
           - "Session-Cookie"
           - "State-Cookie"
+```
+
+```toml tab="File (TOML)"
+[http.middlewares]
+  [http.middlewares.test-auth.forwardAuth]
+    address = "https://example.com/auth"
+    addAuthCookiesToResponse = ["Session-Cookie", "State-Cookie"]
 ```
 
 ### `tls`
@@ -570,4 +570,45 @@ http:
     address = "https://example.com/auth"
     [http.middlewares.test-auth.forwardAuth.tls]
       insecureSkipVerify: true
+```
+
+### `headerField`
+
+_Optional_
+
+You can define a header field to store the authenticated user using the `headerField`option.
+
+```yaml tab="Docker & Swarm"
+labels:
+  - "traefik.http.middlewares.test-auth.forwardauth.headerField=X-WebAuth-User"
+```
+
+```yaml tab="Kubernetes"
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: test-auth
+spec:
+  forwardAuth:
+    # ...
+    headerField: X-WebAuth-User
+```
+
+```json tab="Consul Catalog"
+- "traefik.http.middlewares.test-auth.forwardauth.headerField=X-WebAuth-User"
+```
+
+```yaml tab="File (YAML)"
+http:
+  middlewares:
+    test-auth:
+      forwardAuth:
+        # ...
+        headerField: "X-WebAuth-User"
+```
+
+```toml tab="File (TOML)"
+[http.middlewares.test-auth.forwardAuth]
+  # ...
+  headerField = "X-WebAuth-User"
 ```

@@ -7,12 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/natefinch/lumberjack"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/sirupsen/logrus"
 	"github.com/traefik/traefik/v3/pkg/config/static"
 	"github.com/traefik/traefik/v3/pkg/logs"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func init() {
@@ -46,10 +46,10 @@ func setupLogger(staticConfiguration *static.Configuration) {
 }
 
 func getLogWriter(staticConfiguration *static.Configuration) io.Writer {
-	var w io.Writer = os.Stderr
+	var w io.Writer = os.Stdout
 
 	if staticConfiguration.Log != nil && len(staticConfiguration.Log.FilePath) > 0 {
-		_, _ = os.Create(staticConfiguration.Log.FilePath)
+		_, _ = os.OpenFile(staticConfiguration.Log.FilePath, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0o666)
 		w = &lumberjack.Logger{
 			Filename:   staticConfiguration.Log.FilePath,
 			MaxSize:    staticConfiguration.Log.MaxSize,

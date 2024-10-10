@@ -57,8 +57,17 @@ Activate API directly on the entryPoint named traefik. (Default: ```false```)
 `TRAEFIK_CERTIFICATESRESOLVERS_<NAME>`:  
 Certificates resolvers configuration. (Default: ```false```)
 
+`TRAEFIK_CERTIFICATESRESOLVERS_<NAME>_ACME_CACERTIFICATES`:  
+Specify the paths to PEM encoded CA Certificates that can be used to authenticate an ACME server with an HTTPS certificate not issued by a CA in the system-wide trusted root list.
+
 `TRAEFIK_CERTIFICATESRESOLVERS_<NAME>_ACME_CASERVER`:  
 CA server to use. (Default: ```https://acme-v02.api.letsencrypt.org/directory```)
+
+`TRAEFIK_CERTIFICATESRESOLVERS_<NAME>_ACME_CASERVERNAME`:  
+Specify the CA server name that can be used to authenticate an ACME server with an HTTPS certificate not issued by a CA in the system-wide trusted root list.
+
+`TRAEFIK_CERTIFICATESRESOLVERS_<NAME>_ACME_CASYSTEMCERTPOOL`:  
+Define if the certificates pool must use a copy of the system cert pool. (Default: ```false```)
 
 `TRAEFIK_CERTIFICATESRESOLVERS_<NAME>_ACME_CERTIFICATESDURATION`:  
 Certificates' duration in hours. (Default: ```2160```)
@@ -117,8 +126,14 @@ Entry points definition. (Default: ```false```)
 `TRAEFIK_ENTRYPOINTS_<NAME>_ADDRESS`:  
 Entry point address.
 
+`TRAEFIK_ENTRYPOINTS_<NAME>_ALLOWACMEBYPASS`:  
+Enables handling of ACME TLS and HTTP challenges with custom routers. (Default: ```false```)
+
 `TRAEFIK_ENTRYPOINTS_<NAME>_ASDEFAULT`:  
 Adds this EntryPoint to the list of default EntryPoints to be used on routers that don't have any Entrypoint defined. (Default: ```false```)
+
+`TRAEFIK_ENTRYPOINTS_<NAME>_FORWARDEDHEADERS_CONNECTION`:  
+List of Connection headers that are allowed to pass through the middleware chain before being removed.
 
 `TRAEFIK_ENTRYPOINTS_<NAME>_FORWARDEDHEADERS_INSECURE`:  
 Trust all forwarded headers. (Default: ```false```)
@@ -140,6 +155,9 @@ UDP port to advertise, on which HTTP/3 is available. (Default: ```0```)
 
 `TRAEFIK_ENTRYPOINTS_<NAME>_HTTP_ENCODEQUERYSEMICOLONS`:  
 Defines whether request query semicolons should be URLEncoded. (Default: ```false```)
+
+`TRAEFIK_ENTRYPOINTS_<NAME>_HTTP_MAXHEADERBYTES`:  
+Maximum size of request headers in bytes. (Default: ```1048576```)
 
 `TRAEFIK_ENTRYPOINTS_<NAME>_HTTP_MIDDLEWARES`:  
 Default middlewares for the routers linked to the entry point.
@@ -210,17 +228,41 @@ WriteTimeout is the maximum duration before timing out writes of the response. I
 `TRAEFIK_ENTRYPOINTS_<NAME>_UDP_TIMEOUT`:  
 Timeout defines how long to wait on an idle session before releasing the related resources. (Default: ```3```)
 
+`TRAEFIK_EXPERIMENTAL_FASTPROXY`:  
+Enable the FastProxy implementation. (Default: ```false```)
+
+`TRAEFIK_EXPERIMENTAL_FASTPROXY_DEBUG`:  
+Enable debug mode for the FastProxy implementation. (Default: ```false```)
+
 `TRAEFIK_EXPERIMENTAL_KUBERNETESGATEWAY`:  
-Allow the Kubernetes gateway api provider usage. (Default: ```false```)
+(Deprecated) Allow the Kubernetes gateway api provider usage. (Default: ```false```)
 
 `TRAEFIK_EXPERIMENTAL_LOCALPLUGINS_<NAME>`:  
 Local plugins configuration. (Default: ```false```)
 
 `TRAEFIK_EXPERIMENTAL_LOCALPLUGINS_<NAME>_MODULENAME`:  
-plugin's module name.
+Plugin's module name.
+
+`TRAEFIK_EXPERIMENTAL_LOCALPLUGINS_<NAME>_SETTINGS`:  
+Plugin's settings (works only for wasm plugins).
+
+`TRAEFIK_EXPERIMENTAL_LOCALPLUGINS_<NAME>_SETTINGS_ENVS`:  
+Environment variables to forward to the wasm guest.
+
+`TRAEFIK_EXPERIMENTAL_LOCALPLUGINS_<NAME>_SETTINGS_MOUNTS`:  
+Directory to mount to the wasm guest.
 
 `TRAEFIK_EXPERIMENTAL_PLUGINS_<NAME>_MODULENAME`:  
 plugin's module name.
+
+`TRAEFIK_EXPERIMENTAL_PLUGINS_<NAME>_SETTINGS`:  
+Plugin's settings (works only for wasm plugins).
+
+`TRAEFIK_EXPERIMENTAL_PLUGINS_<NAME>_SETTINGS_ENVS`:  
+Environment variables to forward to the wasm guest.
+
+`TRAEFIK_EXPERIMENTAL_PLUGINS_<NAME>_SETTINGS_MOUNTS`:  
+Directory to mount to the wasm guest.
 
 `TRAEFIK_EXPERIMENTAL_PLUGINS_<NAME>_VERSION`:  
 plugin's version.
@@ -339,6 +381,9 @@ Enable metrics on services. (Default: ```true```)
 `TRAEFIK_METRICS_OTLP_EXPLICITBOUNDARIES`:  
 Boundaries for latency metrics. (Default: ```0.005000, 0.010000, 0.025000, 0.050000, 0.075000, 0.100000, 0.250000, 0.500000, 0.750000, 1.000000, 2.500000, 5.000000, 7.500000, 10.000000```)
 
+`TRAEFIK_METRICS_OTLP_GRPC`:  
+gRPC configuration for the OpenTelemetry collector. (Default: ```false```)
+
 `TRAEFIK_METRICS_OTLP_GRPC_ENDPOINT`:  
 Sets the gRPC endpoint (host:port) of the collector. (Default: ```localhost:4317```)
 
@@ -360,6 +405,9 @@ TLS insecure skip verify (Default: ```false```)
 `TRAEFIK_METRICS_OTLP_GRPC_TLS_KEY`:  
 TLS key
 
+`TRAEFIK_METRICS_OTLP_HTTP`:  
+HTTP configuration for the OpenTelemetry collector. (Default: ```false```)
+
 `TRAEFIK_METRICS_OTLP_HTTP_ENDPOINT`:  
 Sets the HTTP endpoint (scheme://host:port/path) of the collector. (Default: ```https://localhost:4318```)
 
@@ -380,6 +428,9 @@ TLS key
 
 `TRAEFIK_METRICS_OTLP_PUSHINTERVAL`:  
 Period between calls to collect a checkpoint. (Default: ```10```)
+
+`TRAEFIK_METRICS_OTLP_SERVICENAME`:  
+OTEL service name to use. (Default: ```traefik```)
 
 `TRAEFIK_METRICS_PROMETHEUS`:  
 Prometheus metrics exporter type. (Default: ```false```)
@@ -567,6 +618,9 @@ Client timeout for HTTP connections. (Default: ```0```)
 `TRAEFIK_PROVIDERS_DOCKER_NETWORK`:  
 Default Docker network used.
 
+`TRAEFIK_PROVIDERS_DOCKER_PASSWORD`:  
+Password for Basic HTTP authentication.
+
 `TRAEFIK_PROVIDERS_DOCKER_TLS_CA`:  
 TLS CA
 
@@ -581,6 +635,9 @@ TLS key
 
 `TRAEFIK_PROVIDERS_DOCKER_USEBINDPORTIP`:  
 Use the ip address from the bound port, rather than from the inner network. (Default: ```false```)
+
+`TRAEFIK_PROVIDERS_DOCKER_USERNAME`:  
+Username for Basic HTTP authentication.
 
 `TRAEFIK_PROVIDERS_DOCKER_WATCH`:  
 Watch Docker events. (Default: ```true```)
@@ -702,6 +759,9 @@ Allow ExternalName services. (Default: ```false```)
 `TRAEFIK_PROVIDERS_KUBERNETESCRD_CERTAUTHFILEPATH`:  
 Kubernetes certificate authority file path (not needed for in-cluster client).
 
+`TRAEFIK_PROVIDERS_KUBERNETESCRD_DISABLECLUSTERSCOPERESOURCES`:  
+Disables the lookup of cluster scope resources (incompatible with IngressClasses and NodePortLB enabled services). (Default: ```false```)
+
 `TRAEFIK_PROVIDERS_KUBERNETESCRD_ENDPOINT`:  
 Kubernetes server endpoint (required for external cluster client).
 
@@ -713,6 +773,9 @@ Kubernetes label selector to use.
 
 `TRAEFIK_PROVIDERS_KUBERNETESCRD_NAMESPACES`:  
 Kubernetes namespaces.
+
+`TRAEFIK_PROVIDERS_KUBERNETESCRD_NATIVELBBYDEFAULT`:  
+Defines whether to use Native Kubernetes load-balancing mode by default. (Default: ```false```)
 
 `TRAEFIK_PROVIDERS_KUBERNETESCRD_THROTTLEDURATION`:  
 Ingress refresh throttle duration (Default: ```0```)
@@ -737,6 +800,9 @@ Kubernetes label selector to select specific GatewayClasses.
 
 `TRAEFIK_PROVIDERS_KUBERNETESGATEWAY_NAMESPACES`:  
 Kubernetes namespaces.
+
+`TRAEFIK_PROVIDERS_KUBERNETESGATEWAY_NATIVELBBYDEFAULT`:  
+Defines whether to use Native Kubernetes load-balancing by default. (Default: ```false```)
 
 `TRAEFIK_PROVIDERS_KUBERNETESGATEWAY_STATUSADDRESS_HOSTNAME`:  
 Hostname used for Kubernetes Gateway status address.
@@ -771,8 +837,11 @@ Allow ExternalName services. (Default: ```false```)
 `TRAEFIK_PROVIDERS_KUBERNETESINGRESS_CERTAUTHFILEPATH`:  
 Kubernetes certificate authority file path (not needed for in-cluster client).
 
+`TRAEFIK_PROVIDERS_KUBERNETESINGRESS_DISABLECLUSTERSCOPERESOURCES`:  
+Disables the lookup of cluster scope resources (incompatible with IngressClasses and NodePortLB enabled services). (Default: ```false```)
+
 `TRAEFIK_PROVIDERS_KUBERNETESINGRESS_DISABLEINGRESSCLASSLOOKUP`:  
-Disables the lookup of IngressClasses. (Default: ```false```)
+Disables the lookup of IngressClasses (Deprecated, please use DisableClusterScopeResources). (Default: ```false```)
 
 `TRAEFIK_PROVIDERS_KUBERNETESINGRESS_ENDPOINT`:  
 Kubernetes server endpoint (required for external cluster client).
@@ -794,6 +863,9 @@ Kubernetes Ingress label selector to use.
 
 `TRAEFIK_PROVIDERS_KUBERNETESINGRESS_NAMESPACES`:  
 Kubernetes namespaces.
+
+`TRAEFIK_PROVIDERS_KUBERNETESINGRESS_NATIVELBBYDEFAULT`:  
+Defines whether to use Native Kubernetes load-balancing mode by default. (Default: ```false```)
 
 `TRAEFIK_PROVIDERS_KUBERNETESINGRESS_THROTTLEDURATION`:  
 Ingress refresh throttle duration (Default: ```0```)
@@ -851,6 +923,12 @@ Interval for polling Nomad API. (Default: ```15```)
 
 `TRAEFIK_PROVIDERS_NOMAD_STALE`:  
 Use stale consistency for catalog reads. (Default: ```false```)
+
+`TRAEFIK_PROVIDERS_NOMAD_THROTTLEDURATION`:  
+Watch throttle duration. (Default: ```0```)
+
+`TRAEFIK_PROVIDERS_NOMAD_WATCH`:  
+Watch Nomad Service events. (Default: ```false```)
 
 `TRAEFIK_PROVIDERS_PLUGIN_<NAME>`:  
 Plugins configuration.
@@ -939,6 +1017,9 @@ Client timeout for HTTP connections. (Default: ```0```)
 `TRAEFIK_PROVIDERS_SWARM_NETWORK`:  
 Default Docker network used.
 
+`TRAEFIK_PROVIDERS_SWARM_PASSWORD`:  
+Password for Basic HTTP authentication.
+
 `TRAEFIK_PROVIDERS_SWARM_REFRESHSECONDS`:  
 Polling interval for swarm mode. (Default: ```15```)
 
@@ -956,6 +1037,9 @@ TLS key
 
 `TRAEFIK_PROVIDERS_SWARM_USEBINDPORTIP`:  
 Use the ip address from the bound port, rather than from the inner network. (Default: ```false```)
+
+`TRAEFIK_PROVIDERS_SWARM_USERNAME`:  
+Username for Basic HTTP authentication.
 
 `TRAEFIK_PROVIDERS_SWARM_WATCH`:  
 Watch Docker events. (Default: ```true```)
@@ -1050,6 +1134,9 @@ Defines additional attributes (key:value) on all spans.
 `TRAEFIK_TRACING_OTLP`:  
 Settings for OpenTelemetry. (Default: ```false```)
 
+`TRAEFIK_TRACING_OTLP_GRPC`:  
+gRPC configuration for the OpenTelemetry collector. (Default: ```false```)
+
 `TRAEFIK_TRACING_OTLP_GRPC_ENDPOINT`:  
 Sets the gRPC endpoint (host:port) of the collector. (Default: ```localhost:4317```)
 
@@ -1071,6 +1158,9 @@ TLS insecure skip verify (Default: ```false```)
 `TRAEFIK_TRACING_OTLP_GRPC_TLS_KEY`:  
 TLS key
 
+`TRAEFIK_TRACING_OTLP_HTTP`:  
+HTTP configuration for the OpenTelemetry collector. (Default: ```false```)
+
 `TRAEFIK_TRACING_OTLP_HTTP_ENDPOINT`:  
 Sets the HTTP endpoint (scheme://host:port/path) of the collector. (Default: ```https://localhost:4318```)
 
@@ -1088,6 +1178,9 @@ TLS insecure skip verify (Default: ```false```)
 
 `TRAEFIK_TRACING_OTLP_HTTP_TLS_KEY`:  
 TLS key
+
+`TRAEFIK_TRACING_SAFEQUERYPARAMS`:  
+Query params to not redact.
 
 `TRAEFIK_TRACING_SAMPLERATE`:  
 Sets the rate between 0.0 and 1.0 of requests to trace. (Default: ```1.000000```)

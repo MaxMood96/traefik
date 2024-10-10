@@ -146,6 +146,7 @@ linters-settings:
       - github.com/mailgun/multibuf
       - github.com/jaguilar/vt100
       - github.com/cucumber/godog
+      - github.com/http-wasm/http-wasm-host-go
   testifylint:
     disable:
       - suite-dont-use-pkg
@@ -155,23 +156,16 @@ linters-settings:
     checks:
       - all
       - -SA1019
+  errcheck:
+    exclude-functions:
+      - fmt.Fprintln
 linters:
   enable-all: true
   disable:
-    - deadcode # deprecated
-    - exhaustivestruct # deprecated
-    - golint # deprecated
-    - ifshort # deprecated
-    - interfacer # deprecated
-    - maligned # deprecated
-    - nosnakecase # deprecated
-    - scopelint # deprecated
-    - scopelint # deprecated
-    - structcheck # deprecated
-    - varcheck # deprecated
+    - execinquery # deprecated
+    - gomnd # deprecated
     - sqlclosecheck # not relevant (SQL)
     - rowserrcheck # not relevant (SQL)
-    - execinquery # not relevant (SQL)
     - cyclop # duplicate of gocyclo
     - lll # Not relevant
     - gocyclo # FIXME must be fixed
@@ -185,14 +179,14 @@ linters:
     - gochecknoglobals
     - wsl # Too strict
     - nlreturn # Not relevant
-    - gomnd # Too strict
+    - mnd # Too strict
     - stylecheck # skip because report issues related to some generated files.
     - testpackage # Too strict
     - tparallel # Not relevant
     - paralleltest # Not relevant
     - exhaustive # Not relevant
     - exhaustruct # Not relevant
-    - goerr113 # Too strict
+    - err113 # Too strict
     - wrapcheck # Too strict
     - noctx # Too strict
     - bodyclose # too many false-positive
@@ -206,9 +200,7 @@ linters:
     - maintidx # kind of duplicate of gocyclo
     - nonamedreturns # Too strict
     - gosmopolitan  # not relevant
-    - exportloopref # Useless with go1.22
-    - musttag
-    - intrange # bug (fixed in golangci-lint v1.58)
+    - exportloopref # Not relevant since go1.22
 
 issues:
   exclude-use-default: false
@@ -220,12 +212,15 @@ issues:
     - 'Error return value of .((os\.)?std(out|err)\..*|.*Close|.*Flush|os\.Remove(All)?|.*printf?|os\.(Un)?Setenv). is not checked'
     - "should have a package comment, unless it's in another file for this package"
     - 'fmt.Sprintf can be replaced with string'
+    - 'SA1019: dockertypes.ContainerNode is deprecated'
   exclude-rules:
     - path: '(.+)_test.go'
       linters:
         - goconst
         - funlen
         - godot
+        - canonicalheader
+        - fatcontext
     - path: '(.+)_test.go'
       text: ' always receives '
       linters:
@@ -234,7 +229,7 @@ issues:
       text: 'struct-tag: unknown option ''inline'' in JSON tag'
       linters:
         - revive
-    - path: pkg/server/service/bufferpool.go
+    - path: pkg/proxy/httputil/bufferpool.go
       text: 'SA6002: argument should be pointer-like to avoid allocations'
     - path: pkg/server/middleware/middlewares.go
       text: "Function 'buildConstructor' has too many statements"
@@ -285,3 +280,10 @@ issues:
     - path: pkg/cli/loader_file.go
       linters:
         - goconst
+    - path: pkg/provider/acme/local_store.go
+      linters:
+        - musttag
+    - path: pkg/types/metrics.go
+      linters:
+        - goconst
+

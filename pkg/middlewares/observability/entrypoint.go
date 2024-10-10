@@ -11,10 +11,11 @@ import (
 	"github.com/containous/alice"
 	"github.com/traefik/traefik/v3/pkg/metrics"
 	"github.com/traefik/traefik/v3/pkg/middlewares"
+	"github.com/traefik/traefik/v3/pkg/middlewares/accesslog"
 	"github.com/traefik/traefik/v3/pkg/tracing"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 	"go.opentelemetry.io/otel/trace"
 	"go.opentelemetry.io/otel/trace/noop"
 )
@@ -35,7 +36,7 @@ type entryPointTracing struct {
 func WrapEntryPointHandler(ctx context.Context, tracer *tracing.Tracer, semConvMetricRegistry *metrics.SemConvMetricsRegistry, entryPointName string) alice.Constructor {
 	return func(next http.Handler) (http.Handler, error) {
 		if tracer == nil {
-			tracer = tracing.NewTracer(noop.Tracer{}, nil, nil)
+			tracer = tracing.NewTracer(noop.Tracer{}, nil, nil, nil)
 		}
 
 		return newEntryPoint(ctx, tracer, semConvMetricRegistry, entryPointName, next), nil
@@ -47,7 +48,7 @@ func newEntryPoint(ctx context.Context, tracer *tracing.Tracer, semConvMetricReg
 	middlewares.GetLogger(ctx, "tracing", entryPointTypeName).Debug().Msg("Creating middleware")
 
 	if tracer == nil {
-		tracer = tracing.NewTracer(noop.Tracer{}, nil, nil)
+		tracer = tracing.NewTracer(noop.Tracer{}, nil, nil, nil)
 	}
 
 	return &entryPointTracing{
@@ -68,6 +69,12 @@ func (e *entryPointTracing) ServeHTTP(rw http.ResponseWriter, req *http.Request)
 	span.SetAttributes(attribute.String("entry_point", e.entryPoint))
 
 	e.tracer.CaptureServerRequest(span, req)
+
+	if logData := accesslog.GetLogData(req); logData != nil {
+		spanContext := span.SpanContext()
+		logData.Core[accesslog.TraceID] = spanContext.TraceID().String()
+		logData.Core[accesslog.SpanID] = spanContext.SpanID().String()
+	}
 
 	recorder := newStatusCodeRecorder(rw, http.StatusOK)
 	e.next.ServeHTTP(recorder, req)

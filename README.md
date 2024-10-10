@@ -7,7 +7,7 @@
     </picture>
 </p>
 
-[![Build Status SemaphoreCI](https://semaphoreci.com/api/v1/containous/traefik/branches/master/shields_badge.svg)](https://semaphoreci.com/containous/traefik)
+[![Build Status SemaphoreCI](https://traefik-oss.semaphoreci.com/badges/traefik/branches/master.svg?style=shields)](https://traefik-oss.semaphoreci.com/projects/traefik)
 [![Docs](https://img.shields.io/badge/docs-current-brightgreen.svg)](https://doc.traefik.io/traefik)
 [![Go Report Card](https://goreportcard.com/badge/traefik/traefik)](https://goreportcard.com/report/traefik/traefik)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/traefik/traefik/blob/master/LICENSE.md)
@@ -35,7 +35,8 @@ Pointing Traefik at your orchestrator should be the _only_ configuration step yo
 
 ---
 
-:warning: Please be aware that the old configurations for Traefik v1.x are NOT compatible with the v2.x config as of now. If you're running v2, please ensure you are using a [v2 configuration](https://doc.traefik.io/traefik/).
+:warning: When migrating to a new major version of Traefik, please refer to the [migration guide](https://doc.traefik.io/traefik/migration/v2-to-v3/) to ensure a smooth transition and to be aware of any breaking changes.
+
 
 ## Overview
 
@@ -87,7 +88,7 @@ You can access the simple HTML frontend of Traefik.
 
 ## Documentation
 
-You can find the complete documentation of Traefik v2 at [https://doc.traefik.io/traefik/](https://doc.traefik.io/traefik/).
+You can find the complete documentation of Traefik v3 at [https://doc.traefik.io/traefik/](https://doc.traefik.io/traefik/).
 
 A collection of contributions around Traefik can be found at [https://awesome.traefik.io](https://awesome.traefik.io).
 

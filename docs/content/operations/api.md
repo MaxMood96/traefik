@@ -16,13 +16,9 @@ including sensitive data.
 
 In production, it should be at least secured by authentication and authorizations.
 
-A good sane default (non exhaustive) set of recommendations
-would be to apply the following protection mechanisms:
-
-* At the transport level:
-  NOT publicly exposing the API's port,
-  keeping it restricted to internal networks
-  (as in the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege), applied to networks).
+!!! info
+    It's recommended to NOT publicly exposing the API's port, keeping it restricted to internal networks
+    (as in the [principle of least privilege](https://en.wikipedia.org/wiki/Principle_of_least_privilege), applied to networks).
 
 ## Configuration
 
@@ -139,6 +135,15 @@ api:
 ## Endpoints
 
 All the following endpoints must be accessed with a `GET` HTTP request.
+
+!!! info "Pagination"
+
+    By default, up to 100 results are returned per page, and the next page can be checked using the `X-Next-Page` HTTP Header. 
+    To control pagination, use the `page` and `per_page` query parameters.
+
+    ```bash
+    curl https://traefik.example.com:8080/api/http/routers?page=2&per_page=20
+    ```
 
 | Path                           | Description                                                                                 |
 |--------------------------------|---------------------------------------------------------------------------------------------|
